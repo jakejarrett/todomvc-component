@@ -151,8 +151,7 @@ class TodoItem extends Component {
     onDestroyClick () {
         this._element.shadowRoot.querySelector(".destroy").style.display = "none";
         this.remove();
-        this.state.set("completed", true);
-        this.emit(this.state.isCompleted());
+        this.radioChannel.trigger("remove-item");
     }
 
     /**

@@ -106,6 +106,16 @@ class HomeView extends View {
 
             });
 
+            todoItemChannel.on("remove-item", value => {
+                this.todoCount--;
+
+                this.componentChannels["todo-footer"].trigger("update-state", {
+                    count: this.todoCount,
+                    hasItems: !(this.todoCount <= 0)
+                });
+
+            });
+
         });
 
         this.componentChannels["todo-footer"].on("clear-completed", value => {
