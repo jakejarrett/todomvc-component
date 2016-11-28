@@ -1,0 +1,12 @@
+<li class="active" data-role="parent">
+    <section id="basic-view" class="view">
+        <input class="toggle" type="checkbox" <% if (completed) { %>checked<% } %>>
+        <label><%- title %></label>
+        <button class="destroy"></button>
+    </section>
+
+    <section id="edit-view">
+        <input class="edit" value="<%- title %>">
+    </section>
+
+</li>

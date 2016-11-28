@@ -1,0 +1,174 @@
+// Import bootstrap sass variables
+@import "~bootstrap/scss/_variables";
+
+:host {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    font-size: 24px;
+    border-bottom: 1px solid #ededed;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.view, &.edit {
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    &.editing {
+      border-bottom: none;
+      padding: 0;
+
+      & .edit {
+        display: block;
+        width: calc(100% - 43px);
+        padding: 13px 17px 12px 17px;
+        margin: 0 0 0 43px;
+      }
+
+      & .view {
+        display: none;
+      }
+
+      &:last-child {
+        margin-bottom: -1px;
+      }
+
+    }
+
+    & .toggle {
+      text-align: center;
+      width: 40px;
+      /* auto, since non-WebKit browsers doesn't support input styling */
+      height: auto;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      margin: auto 0;
+      border: none; /* Mobile Safari */
+      -webkit-appearance: none;
+      appearance: none;
+      box-shadow: none;
+
+      &:after {
+        content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
+      }
+
+      &:checked:after {
+        content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
+      }
+
+    }
+
+    & label {
+      white-space: pre;
+      word-break: break-word;
+      padding: 15px 60px 15px 15px;
+      margin-left: 45px;
+      display: block;
+      line-height: 1.2;
+      transition: color 0.4s;
+    }
+
+    &.completed label {
+      color: #d9d9d9;
+      text-decoration: line-through;
+    }
+
+    & .destroy {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 10px;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      margin: auto 0;
+      font-size: 30px;
+      color: #cc9a9a;
+      margin-bottom: 11px;
+      transition: color 0.2s ease-out;
+      -webkit-appearance: none;
+      box-shadow: none;
+      border: 0;
+      background: none;
+
+      &:hover {
+        color: #af5b5e;
+      }
+
+      &:after {
+        content: '×';
+      }
+    }
+
+    &:hover {
+      & .destroy {
+        display: block;
+      }
+    }
+
+    & .edit {
+      display: none;
+    }
+
+    @media screen and (-webkit-min-device-pixel-ratio:0) {
+      & .toggle {
+        background: none;
+        height: 40px;
+      }
+    }
+
+  }
+
+
+  button, input[type="checkbox"] {
+    outline: none;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+
+  input {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    font-size: 24px;
+    font-family: inherit;
+    font-weight: inherit;
+    line-height: 1.4em;
+    outline: none;
+    color: inherit;
+    border: 1px solid #999;
+    box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+
+    &::input-placeholder {
+      font-style: italic;
+      font-weight: 300;
+      color: #e6e6e6;
+    }
+
+    &::-moz-placeholder {
+      font-style: italic;
+      font-weight: 300;
+      color: #e6e6e6;
+    }
+
+    &::-webkit-input-placeholder {
+      font-style: italic;
+      font-weight: 300;
+      color: #e6e6e6;
+    }
+  }
+
+}
