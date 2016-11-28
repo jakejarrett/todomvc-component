@@ -147,6 +147,14 @@ class TodoItem extends Component {
         }
     }
 
+    @on("click .destroy")
+    onDestroyClick () {
+        this._element.shadowRoot.querySelector(".destroy").style.display = "none";
+        this.remove();
+        this.state.set("completed", true);
+        this.emit(this.state.isCompleted());
+    }
+
     /**
      * Emit state to the parent View
      *

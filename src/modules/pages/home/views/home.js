@@ -114,6 +114,11 @@ class HomeView extends View {
                     this.componentChannels[key].trigger("clear-completed");
                 }
             }
+
+            this.componentChannels["todo-footer"].trigger("update-state", {
+                count: this.todoCount,
+                hasItems: !(this.todoCount <= 0)
+            });
         });
 
     }
