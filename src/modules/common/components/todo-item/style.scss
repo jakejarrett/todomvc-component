@@ -10,6 +10,7 @@
     position: relative;
     font-size: 24px;
     border-bottom: 1px solid #ededed;
+    transition: transform 0.4s ease-in-out;
 
     &:last-child {
       border-bottom: none;

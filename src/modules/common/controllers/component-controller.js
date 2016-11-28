@@ -49,8 +49,6 @@ class ComponentController extends Marionette.Object {
             return document.createElement(componentName);
         }
 
-        console.log(ComponentModule.element.prototype);
-
         let tempObj = Object.create(ComponentModule.element.prototype);
 
         /**
@@ -62,7 +60,7 @@ class ComponentController extends Marionette.Object {
 
         const elem = new Component;
 
-        // ComponentModule.element = tempObj;
+        ComponentModule._element = elem;
 
         if(!(CustomElements.useNative)) {
             WebComponents.ShadowCSS.shimStyling(elem.shadowRoot, `${componentName}`);

@@ -53,6 +53,6 @@ class AddTodo extends Component {
 /**
  *  Export the Component
  *
- * @exports LoginComponent
+ * @exports AddTodo
  */
 export default AddTodo;

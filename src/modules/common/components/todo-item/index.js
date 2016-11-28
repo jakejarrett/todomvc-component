@@ -35,6 +35,7 @@ class TodoItem extends Component {
         const renderedTemplate = _.template(Template)(this.state.attributes);
 
         this.renderComponent(elementName, renderedTemplate, Styles, this.state);
+        this.setupEventListeners();
     }
 
     /**
@@ -101,6 +102,7 @@ class TodoItem extends Component {
         this.toggleViewState({ view, edit, parent });
 
         edit.focus();
+        edit.select();
     }
 
     /**
@@ -136,6 +138,7 @@ class TodoItem extends Component {
             console.log(event.code);
             switch (event.code) {
                 case "Escape":
+                case "NumpadEnter":
                 case "Enter": {
                     event.srcElement.shadowRoot.querySelector(".edit").blur();
                     break;
@@ -153,11 +156,29 @@ class TodoItem extends Component {
         this.radioChannel.trigger("stateChange", state);
     }
 
+    remove () {
+        const listItem = this._element.shadowRoot.querySelector("li");
+
+        listItem.addEventListener("transitionend", e => {
+            listItem.style.display = "none";
+        });
+
+        listItem.style.transform = "translateX(-100%)";
+    }
+
+    setupEventListeners () {
+        this.radioChannel.on("clear-completed", _ => {
+            if(this.state.isCompleted()) {
+                this.remove();
+            }
+        });
+    }
+
 }
 
 /**
  *  Export the Component
  *
- * @exports LoginComponent
+ * @exports TodoItem
  */
 export default TodoItem;

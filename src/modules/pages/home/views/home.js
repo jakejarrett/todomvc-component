@@ -1,8 +1,9 @@
 import App from "app/app";
 import { View } from "marionette";
-import {attribute, className, tagName, template, on} from "modules/common/controllers/decorators";
+import {attributes, className, tagName, template, on} from "modules/common/controllers/decorators";
 import AddTodo from "modules/common/components/add-todo-item";
 import TodoItem from "modules/common/components/todo-item";
+import TodoFooter from "modules/common/components/todo-footer";
 import Template from "./home.html";
 import "./home.scss";
 
@@ -14,15 +15,17 @@ import "./home.scss";
  */
 @className("home")
 @template(Template)
-@attribute("components", {})
-@attribute("componentChannels", {})
+@attributes({
+    components: {},
+    componentChannels: {},
+    _count: 0,
+    todoCount: 0,
+    rendered: false
+})
 class HomeView extends View {
 
     constructor () {
         super();
-
-        this._count = 0;
-        this.todoCount = 0;
     }
 
     /**
@@ -37,7 +40,6 @@ class HomeView extends View {
                 that.$el.find("#content-container").html(_.template(require("./home.html")));
             });
 
-            module.hot.accept("modules/common/components/todo-item", elem => that.components["todo-item"].updateElement());
         }
     }
 
@@ -49,21 +51,29 @@ class HomeView extends View {
     onRender () {
         this.setupComponents();
         this.setupComponentEventListeners();
+        this.rendered = true;
     }
 
     setupComponents () {
-        let $componentContainer = this.$el.find("#component-container");
-
-        this.registerComponent("add-todo-item", AddTodo, $componentContainer);
+        if(!this.rendered) {
+            this.registerComponent("add-todo-item", AddTodo, this.$el.find("#add-todo"));
+            this.registerComponent("todo-footer", TodoFooter, this.$el.find("#todo-footer"), {
+                count: this._count
+            });
+        }
     }
 
     setupComponentEventListeners () {
         /** We can listen to events emitted by the component. **/
         this.componentChannels["add-todo-item"].on("add-item", value => {
-            this.registerComponent("todo-item", TodoItem, this.$el.find("#component-container"), { value: value }, true);
-            this.$el.find("#footer").show();
+            this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
+
             this.todoCount++;
-            this.$el.find("#todo-count").find("strong").text(`${this.todoCount}`);
+
+            this.componentChannels["todo-footer"].trigger("update-state", {
+                count: this.todoCount,
+                hasItems: !(this._count <= 0)
+            });
 
             if(this.todoCount > 1) {
                 this.$el.find("#grammar").text("items");
@@ -79,6 +89,9 @@ class HomeView extends View {
                 todoItemChannel = this.componentChannels[`todo-item`];
             }
 
+            /**
+             * When one of the todo items changes state, update other components.
+             */
             todoItemChannel.on("stateChange", value => {
                 if(value) {
                     this.todoCount--;
@@ -86,11 +99,22 @@ class HomeView extends View {
                     this.todoCount++;
                 }
 
-                this.$el.find("#todo-count").find("strong").text(`${this.todoCount}`);
-            })
+                this.componentChannels["todo-footer"].trigger("update-state", {
+                    count: this.todoCount,
+                    hasItems: !(this._count <= 0)
+                });
+
+            });
+
         });
 
-
+        this.componentChannels["todo-footer"].on("clear-completed", value => {
+            for (let key in this.componentChannels) {
+                if(/^todo-item/.test(key)) {
+                    this.componentChannels[key].trigger("clear-completed");
+                }
+            }
+        });
 
     }
 
