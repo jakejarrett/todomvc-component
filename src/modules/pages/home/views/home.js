@@ -107,12 +107,18 @@ class HomeView extends View {
             });
 
             todoItemChannel.on("remove-item", value => {
-                this.todoCount--;
+                if(-1 === Math.sign(this.todoCount - 1)) {
+                    this.todoCount = 0;
+                } else {
+                    this.todoCount--;
+                }
 
                 this.componentChannels["todo-footer"].trigger("update-state", {
                     count: this.todoCount,
-                    hasItems: !(this.todoCount <= 0)
+                    hasItems: (this.todoCount >= 1 || this.$el.find("#todo-list").children().length === 0)
                 });
+
+                this.$el.find(value).remove();
 
             });
 

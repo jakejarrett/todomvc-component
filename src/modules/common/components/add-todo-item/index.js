@@ -33,7 +33,7 @@ class AddTodo extends Component {
     @on("submit")
     onFormSubmit (event) {
         event.preventDefault();
-        const el = event.srcElement.shadowRoot.querySelector("input");
+        const el = this._element.shadowRoot.querySelector("input");
         this.emit("add-item", el.value);
         el.value = "";
     }

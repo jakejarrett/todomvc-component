@@ -31,10 +31,15 @@ class TodoFooter extends Component {
         this.radioChannel.on("update-state", value => {
             const countEl = this._element.shadowRoot.querySelector("#todo-count");
             const footerEl = this._element.shadowRoot.querySelector("#footer");
+            let count;
 
-            console.log(value.hasItems);
+            if(-1 === Math.sign(value.count)) {
+                count = 0;
+            } else {
+                count = value.count;
+            }
 
-            countEl.querySelector("#count").innerText = value.count;
+            countEl.querySelector("#count").innerText = count;
 
             if(1 === value.count) {
                 countEl.querySelector("#grammar").innerText = "item";

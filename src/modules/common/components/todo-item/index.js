@@ -31,6 +31,7 @@ class TodoItem extends Component {
         this.state = new TodoModel({
             title: value
         });
+        this.elementName = elementName;
 
         const renderedTemplate = _.template(Template)(this.state.attributes);
 
@@ -45,7 +46,7 @@ class TodoItem extends Component {
      */
     @on("click input[type='checkbox']")
     onCheckboxValueChange (event) {
-        let parent = event.srcElement.shadowRoot.querySelector("[data-role='parent']");
+        let parent = this._element.shadowRoot.querySelector("[data-role='parent']");
 
         this.state.toggle();
 
@@ -95,9 +96,9 @@ class TodoItem extends Component {
      */
     @on("dblclick label")
     onLabelDoubleClick (event) {
-        const view = event.srcElement.shadowRoot.querySelector(".view");
-        const edit = event.srcElement.shadowRoot.querySelector(".edit");
-        const parent = event.srcElement.shadowRoot.querySelector("[data-role='parent']");
+        const view = this._element.shadowRoot.querySelector(".view");
+        const edit = this._element.shadowRoot.querySelector(".edit");
+        const parent = this._element.shadowRoot.querySelector("[data-role='parent']");
 
         this.toggleViewState({ view, edit, parent });
 
@@ -112,9 +113,9 @@ class TodoItem extends Component {
      */
     @on("blur .edit")
     onEditBlur (event) {
-        const view = event.srcElement.shadowRoot.querySelector(".view");
-        const edit = event.srcElement.shadowRoot.querySelector(".edit");
-        const parent = event.srcElement.shadowRoot.querySelector("[data-role='parent']");
+        const view = this._element.shadowRoot.querySelector(".view");
+        const edit = this._element.shadowRoot.querySelector(".edit");
+        const parent = this._element.shadowRoot.querySelector("[data-role='parent']");
 
         if("" !== edit.value.trim()) {
             this.state.set("title", edit.value);
@@ -135,12 +136,11 @@ class TodoItem extends Component {
     @on("keyup .edit")
     onEditKeyup (event) {
         if(this.state.get("editing")) {
-            console.log(event.code);
             switch (event.code) {
                 case "Escape":
                 case "NumpadEnter":
                 case "Enter": {
-                    event.srcElement.shadowRoot.querySelector(".edit").blur();
+                    this._element.shadowRoot.querySelector(".edit").blur();
                     break;
                 }
             }
@@ -151,7 +151,6 @@ class TodoItem extends Component {
     onDestroyClick () {
         this._element.shadowRoot.querySelector(".destroy").style.display = "none";
         this.remove();
-        this.radioChannel.trigger("remove-item");
     }
 
     /**
@@ -168,6 +167,7 @@ class TodoItem extends Component {
 
         listItem.addEventListener("transitionend", e => {
             listItem.style.display = "none";
+            this.radioChannel.trigger("remove-item", this.elementName);
         });
 
         listItem.style.transform = "translateX(-100%)";
