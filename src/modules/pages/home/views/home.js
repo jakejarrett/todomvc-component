@@ -19,6 +19,7 @@ import "./home.scss";
     components: {},
     componentChannels: {},
     _count: {},
+    selectedItems: {},
     todoCount: 0,
     rendered: false
 })
@@ -64,25 +65,26 @@ class HomeView extends View {
     }
 
     setupComponentEventListeners () {
+        const that = this;
+
         /** We can listen to events emitted by the component. **/
         this.componentChannels["add-todo-item"].on("add-item", value => {
-            let todoItem = this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
-
-            this.componentChannels["todo-footer"].trigger("update-state", {
-                count: this.todoCount,
-                hasItems: !(this.todoCount <= 0)
-            });
+            const todoItem = this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
 
             let todoItemChannel = this.componentChannels[todoItem];
+            todoItemChannel.trigger("dom-ready", this.components[todoItem].element);
 
             /**
              * When one of the todo items changes state, update other components.
              */
-            todoItemChannel.on("stateChange", value => {
-                if(value) {
+            todoItemChannel.on("stateChange", ({state, target}) => {
+                if(state) {
                     this.todoCount--;
+                    that.selectedItems[target] = state;
+                    console.log(that.selectedItems);
                 } else {
                     this.todoCount++;
+                    delete that.selectedItems[target];
                 }
 
                 this.componentChannels["todo-footer"].trigger("update-state", {
@@ -93,35 +95,31 @@ class HomeView extends View {
             });
 
             todoItemChannel.on("remove-item", value => {
-                if(-1 === Math.sign(this.todoCount - 1)) {
-                    this.todoCount = 0;
-                } else {
-                    this.todoCount--;
-                }
+                this.$el.find(`[data-id='${value}']`).remove();
 
                 this.componentChannels["todo-footer"].trigger("update-state", {
-                    count: this.todoCount,
-                    hasItems: (this.todoCount >= 1 || this.$el.find("#todo-list").children().length === 0)
+                    count: this.$el.find("#todo-list").children().length,
+                    hasItems: (this.$el.find("#todo-list").children().length !== 0)
                 });
 
-                this.$el.find(value).remove();
+                this.todoCount = this.$el.find("#todo-list").children().length;
 
             });
 
             this.todoCount++;
 
-            if(this.todoCount > 1) {
-                this.$el.find("#grammar").text("items");
-            } else {
-                this.$el.find("#grammar").text("item")
-            }
+            this.componentChannels["todo-footer"].trigger("update-state", {
+                count: this.todoCount,
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
+            });
 
         });
 
         this.componentChannels["todo-footer"].on("clear-completed", value => {
-            for (let key in this.componentChannels) {
-                if(/^todo-item/.test(key)) {
-                    this.componentChannels[key].trigger("clear-completed");
+            for (let key in this.selectedItems) {
+                if(this.selectedItems[key]) {
+                    this.componentChannels[key].trigger("clear-completed", key);
+                    delete this.selectedItems[key];
                 }
             }
 

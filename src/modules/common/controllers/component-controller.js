@@ -52,11 +52,10 @@ class ComponentController extends Marionette.Object {
             });
         }
 
-        const elem = document.createElement(componentName);
+        let elem = document.createElement(componentName);
         elem.setAttribute("data-id", localCompName);
 
         ComponentModule._element = elem;
-        console.log(elem, document.querySelector(`[data-id="${localCompName}"]`))
 
         if(!(CustomElements.useNative)) {
             WebComponents.ShadowCSS.shimStyling(elem.shadowRoot, `${componentName}`);
