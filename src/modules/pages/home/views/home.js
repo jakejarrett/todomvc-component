@@ -94,7 +94,7 @@ class HomeView extends View {
 
                 this.componentChannels["todo-footer"].trigger("update-state", {
                     count: this.todoCount,
-                    hasItems: !(this._count <= 0)
+                    hasItems: (this.$el.find("#todo-list").children().length !== 0)
                 });
 
             });
@@ -109,6 +109,7 @@ class HomeView extends View {
 
                 this.todoCount = this.$el.find("#todo-list").children().length;
 
+                delete this.componentChannels[value];
             });
 
             this.todoCount++;
@@ -133,7 +134,7 @@ class HomeView extends View {
 
             this.componentChannels["todo-footer"].trigger("update-state", {
                 count: this.todoCount,
-                hasItems: !(this.todoCount <= 0)
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
         });
 
@@ -149,7 +150,7 @@ class HomeView extends View {
 
             this.componentChannels["todo-footer"].trigger("update-state", {
                 count: this.todoCount,
-                hasItems: !(this.todoCount <= 0)
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
         });
 
