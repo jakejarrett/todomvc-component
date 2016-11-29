@@ -80,11 +80,16 @@ class HomeView extends View {
             todoItemChannel.on("stateChange", ({state, target}) => {
                 if(state) {
                     this.todoCount--;
-                    that.selectedItems[target] = state;
-                    console.log(that.selectedItems);
                 } else {
                     this.todoCount++;
-                    delete that.selectedItems[target];
+                }
+
+                if(target !== undefined) {
+                    if(state) {
+                        that.selectedItems[target] = state;
+                    } else {
+                        delete that.selectedItems[target];
+                    }
                 }
 
                 this.componentChannels["todo-footer"].trigger("update-state", {
@@ -115,11 +120,30 @@ class HomeView extends View {
 
         });
 
+        /**
+         * When the footer tells us to clear all completed items, we'll notify the todo-item's
+         */
         this.componentChannels["todo-footer"].on("clear-completed", value => {
             for (let key in this.selectedItems) {
                 if(this.selectedItems[key]) {
                     this.componentChannels[key].trigger("clear-completed", key);
                     delete this.selectedItems[key];
+                }
+            }
+
+            this.componentChannels["todo-footer"].trigger("update-state", {
+                count: this.todoCount,
+                hasItems: !(this.todoCount <= 0)
+            });
+        });
+
+        /**
+         * When the footer tells us to show only a specific type, we'll notify the items.
+         */
+        this.componentChannels["todo-footer"].on("show-type", value => {
+            for (let key in this.componentChannels) {
+                if(/^todo-item/.test(key)) {
+                    this.componentChannels[key].trigger("show-type", value);
                 }
             }
 

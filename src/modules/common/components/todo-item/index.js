@@ -204,6 +204,30 @@ class TodoItem extends Component {
                 this.remove(el, lookup);
             }
         });
+
+        this.radioChannel.on("show-type", type => {
+            const channelName = this.radioChannel.channelName;
+            const domIdName = channelName.substring(channelName.indexOf(":") + 1);
+            const listItem = document.querySelector(`[data-id='${domIdName}']`).shadowRoot.querySelector("li");
+
+            switch(type) {
+                case "active":
+                case "completed": {
+                    if(!listItem.classList.contains(type)) {
+                        listItem.style.display = "none";
+                    } else {
+                        listItem.style.display = "list-item";
+                    }
+                    break;
+                }
+
+                case "all":
+                default: {
+                    listItem.removeAttribute("style");
+                    break;
+                }
+            }
+        });
     }
 
 }

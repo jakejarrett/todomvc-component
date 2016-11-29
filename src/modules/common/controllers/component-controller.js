@@ -76,16 +76,6 @@ class ComponentController extends Marionette.Object {
     }
 
     /**
-     * Lifecycle
-     *      Check if registered
-     *          Register if not
-     *              Register local hooks for component
-     *      Return the element
-     *
-     * Need to make it so we can register multiples of one <elem-type>
-     */
-
-    /**
      * Returns a registered component
      *
      * @param name {String} Name of the component you wish to lookup.

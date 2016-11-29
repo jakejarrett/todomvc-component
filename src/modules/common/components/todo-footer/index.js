@@ -19,6 +19,12 @@ class TodoFooter extends Component {
         return this;
     }
 
+    /**
+     * Render the component
+     *
+     * @param elementName {String} The element's name eg/ <element-name>)
+     * @param props {Object} Properties
+     */
     render (elementName, props) {
         const renderedTemplate = _.template(Template)(props);
 
@@ -27,6 +33,9 @@ class TodoFooter extends Component {
         this.setupRadioEventListeners();
     }
 
+    /**
+     * Setup radio event listeners
+     */
     setupRadioEventListeners () {
         this.radioChannel.on("update-state", value => {
             const countEl = this._element.shadowRoot.querySelector("#todo-count");
@@ -56,9 +65,29 @@ class TodoFooter extends Component {
         });
     }
 
+    /**
+     * When the user clicks "Clear completed", we'll emit an event to do so & unfocus the button.
+     */
     @on("click #clear-completed")
-    clearCompleted () {
+    clearCompleted (e) {
+        e.path[0].blur();
         this.radioChannel.trigger("clear-completed");
+    }
+
+    /**
+     * When the user clicks one of the filters, we'll handle the functionality
+     *
+     * @param event {Event} The click event
+     */
+    @on("click a")
+    onFiltersClick (event) {
+        event.preventDefault();
+        const parent = event.target.shadowRoot;
+        const el = event.path[0];
+
+        parent.querySelector(".selected").classList.remove("selected");
+        el.classList.add("selected");
+        this.radioChannel.trigger("show-type", el.innerText.toLocaleLowerCase());
     }
 
     /**
