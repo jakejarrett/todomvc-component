@@ -18,7 +18,7 @@ import "./home.scss";
 @attributes({
     components: {},
     componentChannels: {},
-    _count: 0,
+    _count: {},
     todoCount: 0,
     rendered: false
 })
@@ -58,7 +58,7 @@ class HomeView extends View {
         if(!this.rendered) {
             this.registerComponent("add-todo-item", AddTodo, this.$el.find("#add-todo"));
             this.registerComponent("todo-footer", TodoFooter, this.$el.find("#todo-footer"), {
-                count: this._count
+                count: this.todoCount
             });
         }
     }
@@ -66,28 +66,14 @@ class HomeView extends View {
     setupComponentEventListeners () {
         /** We can listen to events emitted by the component. **/
         this.componentChannels["add-todo-item"].on("add-item", value => {
-            this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
-
-            this.todoCount++;
+            let todoItem = this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
 
             this.componentChannels["todo-footer"].trigger("update-state", {
                 count: this.todoCount,
-                hasItems: !(this._count <= 0)
+                hasItems: !(this.todoCount <= 0)
             });
 
-            if(this.todoCount > 1) {
-                this.$el.find("#grammar").text("items");
-            } else {
-                this.$el.find("#grammar").text("item")
-            }
-
-            let todoItemChannel;
-
-            if(this._count > 0) {
-                todoItemChannel = this.componentChannels[`todo-item-${this._count - 1}`];
-            } else {
-                todoItemChannel = this.componentChannels[`todo-item`];
-            }
+            let todoItemChannel = this.componentChannels[todoItem];
 
             /**
              * When one of the todo items changes state, update other components.
@@ -122,6 +108,14 @@ class HomeView extends View {
 
             });
 
+            this.todoCount++;
+
+            if(this.todoCount > 1) {
+                this.$el.find("#grammar").text("items");
+            } else {
+                this.$el.find("#grammar").text("item")
+            }
+
         });
 
         this.componentChannels["todo-footer"].on("clear-completed", value => {
@@ -146,31 +140,37 @@ class HomeView extends View {
      * @param component {HTMLElement} The component you're registering.
      * @param el {jQuery} Container/Element you're putting the component into.
      * @param properties {Object} Properties you wish to apply to the component.
-     * @param isListItem {Boolean} Will render it regardless of if an element with that name exists already.
      */
-    registerComponent (componentName, component, el, properties, isListItem) {
+    registerComponent (componentName, component, el, properties) {
         let Component = App.Compontents;
         let localCompName;
 
-        if(Component.getComponent(componentName) !== undefined && isListItem) {
-            localCompName = `${componentName}-${this._count}`;
-            this._count++;
+        if(undefined !== this.components[componentName]) {
+
+            if(undefined === this._count[componentName]) {
+                this._count[componentName] = 0;
+            }
+            
+            localCompName = `${componentName}-${this._count[componentName]}`;
+            this._count[componentName]++;
+
         } else {
             localCompName = componentName;
         }
 
-        Component.register(localCompName, component, properties, isListItem);
+        const local = Component.register(componentName, component, properties, localCompName);
         const componentObject = Component.getComponent(localCompName);
 
         /** Store references to the component & radio channels **/
-        this.components[componentObject.elementName] = {
+        this.components[localCompName] = {
             element: componentObject.component,
             module: componentObject.componentModule
         };
 
-        this.componentChannels[componentObject.elementName] = componentObject.radioChannel || {};
+        this.componentChannels[localCompName] = componentObject.radioChannel || {};
+        el.append(local);
 
-        el.append(componentObject.component);
+        return localCompName;
     }
 }
 

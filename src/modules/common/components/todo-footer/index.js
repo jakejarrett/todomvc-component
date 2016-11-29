@@ -11,8 +11,8 @@ class TodoFooter extends Component {
     /**
      * Setup our component.
      */
-    constructor (elementName, props) {
-        super(elementName);
+    constructor (elementName, props, localCompName) {
+        super(elementName, localCompName);
 
         this.render(elementName, props);
 

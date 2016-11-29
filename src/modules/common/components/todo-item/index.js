@@ -12,8 +12,8 @@ class TodoItem extends Component {
     /**
      * Setup our component.
      */
-    constructor (elementName, {value}) {
-        super(elementName);
+    constructor (elementName, {value}, localCompName) {
+        super(elementName, localCompName);
 
         this.render(elementName, value);
 
@@ -46,6 +46,7 @@ class TodoItem extends Component {
      */
     @on("click input[type='checkbox']")
     onCheckboxValueChange (event) {
+        console.log(this._element);
         let parent = this._element.shadowRoot.querySelector("[data-role='parent']");
 
         this.state.toggle();
