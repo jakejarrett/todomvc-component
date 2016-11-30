@@ -71,6 +71,10 @@ class HomeView extends View {
         this.componentChannels["add-todo-item"].on("add-item", value => {
             const todoItem = this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
 
+            this.componentChannels["add-todo-item"].trigger("update-state", {
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
+            });
+
             let todoItemChannel = this.componentChannels[todoItem];
             todoItemChannel.trigger("dom-ready", this.components[todoItem].element);
 
@@ -152,6 +156,17 @@ class HomeView extends View {
                 count: this.todoCount,
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
+        });
+
+        /**
+         * When we click the toggle all checkbox.
+         */
+        this.componentChannels["add-todo-item"].on("toggle-all", toggle => {
+            for (let key in this.componentChannels) {
+                if(/^todo-item/.test(key)) {
+                    this.componentChannels[key].trigger("toggle", toggle);
+                }
+            }
         });
 
     }

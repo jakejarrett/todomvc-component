@@ -52,14 +52,19 @@
     }
   }
 
+  label[for='toggle-all'] {
+    display: none;
+  }
+
   #toggle-all {
     position: absolute;
-    top: -55px;
+    top: -53px;
     left: -12px;
     width: 60px;
-    height: 34px;
     text-align: center;
     border: none; /* Mobile Safari */
+    box-shadow: none;
+    z-index: 100;
   }
 
   #toggle-all:before {
@@ -72,4 +77,18 @@
   #toggle-all:checked:before {
     color: #737373;
   }
+
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    #toggle-all {
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    #toggle-all, #todo-list li .toggle {
+      background: none;
+    }
+  }
+
 }

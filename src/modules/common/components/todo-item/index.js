@@ -228,6 +228,27 @@ class TodoItem extends Component {
                 }
             }
         });
+
+        this.radioChannel.on("toggle", toggle => {
+            const channelName = this.radioChannel.channelName;
+            const domIdName = channelName.substring(channelName.indexOf(":") + 1);
+            const el = document.querySelector(`[data-id='${domIdName}']`).shadowRoot;
+            let parent = el.querySelector("[data-role='parent']");
+
+            this.state.set("completed", toggle);
+
+            if(toggle) {
+                parent.classList.remove("active");
+                parent.classList.add("completed");
+                el.querySelector("input[type='checkbox']").checked = true;
+            } else {
+                parent.classList.remove("completed");
+                parent.classList.add("active");
+                el.querySelector("input[type='checkbox']").checked = false;
+            }
+
+            this.emit({ state: toggle, target: domIdName });
+        });
     }
 
 }

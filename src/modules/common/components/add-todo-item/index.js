@@ -23,6 +23,8 @@ class AddTodo extends Component {
         const renderedTemplate = _.template(Template)();
 
         this.renderComponent(elementName, renderedTemplate, Styles);
+
+        this.setupRadioEventListeners();
     }
 
     /**
@@ -33,9 +35,14 @@ class AddTodo extends Component {
     @on("submit")
     onFormSubmit (event) {
         event.preventDefault();
-        const el = this._element.shadowRoot.querySelector("input");
+        const el = this._element.shadowRoot.querySelector("#new-todo");
         this.emit("add-item", el.value);
         el.value = "";
+    }
+
+    @on("click #toggle-all")
+    onToggleAllChange (event) {
+        this.emit("toggle-all", this._element.shadowRoot.querySelector("#toggle-all").checked)
     }
 
     /**
@@ -46,6 +53,20 @@ class AddTodo extends Component {
      */
     emit (eventType, attribute) {
         this.radioChannel.trigger(eventType, attribute);
+    }
+
+    setupRadioEventListeners () {
+        this.radioChannel.on("update-state", state => {
+            const toggleAll = this._element.shadowRoot.querySelector("#toggle-all");
+
+            console.log(state);
+
+            if(state.hasItems) {
+                toggleAll.style.display = "block";
+            } else {
+                toggleAll.style.display = "none";
+            }
+        });
     }
 
 }
