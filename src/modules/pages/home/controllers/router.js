@@ -1,5 +1,5 @@
 import Marionette, { AppRouter } from "marionette";
-import {controller, appRoute} from "modules/common/controllers/decorators";
+import { controller, appRoute } from "marionette-decorators";
 import HomeRouterController from "./router-contoller";
 import App from "app/app";
 
@@ -16,8 +16,6 @@ class HomeRouter extends AppRouter {
     }
 
     initialize () {
-        var that = this;
-
         if(module.hot) {
             module.hot.accept("../views/home", () => {
                 System.import("../views/home").then(View => App.getContentContainer().show(new View.default()));

@@ -1,6 +1,6 @@
 import App from "app/app";
-import { View } from "marionette";
-import {attributes, className, tagName, template, on} from "modules/common/controllers/decorators";
+import { View } from "@jakejarrett/marionette-component";
+import {attributes, className, tagName, template, on} from "marionette-decorators";
 import AddTodo from "modules/common/components/add-todo-item";
 import TodoItem from "modules/common/components/todo-item";
 import TodoFooter from "modules/common/components/todo-footer";
@@ -13,11 +13,7 @@ import "./home.scss";
  * @module modules/pages/home
  * @exports HomeView
  */
-@className("home")
-@template(Template)
 @attributes({
-    components: {},
-    componentChannels: {},
     _count: {},
     selectedItems: {},
     todoCount: 0,
@@ -25,8 +21,19 @@ import "./home.scss";
 })
 class HomeView extends View {
 
+    get className () {
+        return "home";
+    }
+
+    /**
+     * Constructor
+     */
     constructor () {
         super();
+    }
+
+    template (serializedModel) {
+        return _.template(Template, serializedModel);
     }
 
     /**
@@ -39,8 +46,10 @@ class HomeView extends View {
             /** Require the template & re-render :) **/
             module.hot.accept("./home.html", res => {
                 that.$el.find("#content-container").html(_.template(require("./home.html")));
-            });
+                that.render();
 
+                // Ahh
+            });
         }
     }
 
@@ -55,10 +64,13 @@ class HomeView extends View {
         this.rendered = true;
     }
 
+    /**
+     * Setup the initial components
+     */
     setupComponents () {
         if(!this.rendered) {
-            this.registerComponent("add-todo-item", AddTodo, this.$el.find("#add-todo"));
-            this.registerComponent("todo-footer", TodoFooter, this.$el.find("#todo-footer"), {
+            this.registerComponent(App.Compontents, "add-todo-item", AddTodo, this.$el.find("#add-todo"));
+            this.registerComponent(App.Compontents, "todo-footer", TodoFooter, this.$el.find("#todo-footer"), {
                 count: this.todoCount
             });
         }
@@ -66,17 +78,20 @@ class HomeView extends View {
 
     setupComponentEventListeners () {
         const that = this;
+        const addTodoItemChannel = this.getComponent("add-todo-item").radioChannel;
+        const footerChannel = this.getComponent("todo-footer").radioChannel;
 
         /** We can listen to events emitted by the component. **/
-        this.componentChannels["add-todo-item"].on("add-item", value => {
-            const todoItem = this.registerComponent("todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
+        addTodoItemChannel.on("add-item", value => {
+            const todoItem = this.registerComponent(App.Compontents, "todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
 
-            this.componentChannels["add-todo-item"].trigger("update-state", {
+            addTodoItemChannel.trigger("update-state", {
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
 
-            let todoItemChannel = this.componentChannels[todoItem];
-            todoItemChannel.trigger("dom-ready", this.components[todoItem].element);
+            let todoItemObj = this.getComponent(todoItem);
+            let todoItemChannel = todoItemObj.radioChannel;
+            todoItemChannel.trigger("dom-ready", todoItemObj.element);
 
             /**
              * When one of the todo items changes state, update other components.
@@ -96,7 +111,7 @@ class HomeView extends View {
                     }
                 }
 
-                this.componentChannels["todo-footer"].trigger("update-state", {
+                footerChannel.trigger("update-state", {
                     count: this.todoCount,
                     hasItems: (this.$el.find("#todo-list").children().length !== 0)
                 });
@@ -106,19 +121,19 @@ class HomeView extends View {
             todoItemChannel.on("remove-item", value => {
                 this.$el.find(`[data-id='${value}']`).remove();
 
-                this.componentChannels["todo-footer"].trigger("update-state", {
+                footerChannel.trigger("update-state", {
                     count: this.$el.find("#todo-list").children().length,
                     hasItems: (this.$el.find("#todo-list").children().length !== 0)
                 });
 
                 this.todoCount = this.$el.find("#todo-list").children().length;
 
-                delete this.componentChannels[value];
+                delete this._componentChannels[value];
             });
 
             this.todoCount++;
 
-            this.componentChannels["todo-footer"].trigger("update-state", {
+            footerChannel.trigger("update-state", {
                 count: this.todoCount,
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
@@ -128,15 +143,15 @@ class HomeView extends View {
         /**
          * When the footer tells us to clear all completed items, we'll notify the todo-item's
          */
-        this.componentChannels["todo-footer"].on("clear-completed", value => {
+        footerChannel.on("clear-completed", value => {
             for (let key in this.selectedItems) {
                 if(this.selectedItems[key]) {
-                    this.componentChannels[key].trigger("clear-completed", key);
+                    this._componentChannels[key].trigger("clear-completed", key);
                     delete this.selectedItems[key];
                 }
             }
 
-            this.componentChannels["todo-footer"].trigger("update-state", {
+            footerChannel.trigger("update-state", {
                 count: this.todoCount,
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
@@ -145,14 +160,14 @@ class HomeView extends View {
         /**
          * When the footer tells us to show only a specific type, we'll notify the items.
          */
-        this.componentChannels["todo-footer"].on("show-type", value => {
-            for (let key in this.componentChannels) {
+        footerChannel.on("show-type", value => {
+            for (let key in this._componentChannels) {
                 if(/^todo-item/.test(key)) {
-                    this.componentChannels[key].trigger("show-type", value);
+                    this._componentChannels[key].trigger("show-type", value);
                 }
             }
 
-            this.componentChannels["todo-footer"].trigger("update-state", {
+            footerChannel.trigger("update-state", {
                 count: this.todoCount,
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
             });
@@ -161,55 +176,16 @@ class HomeView extends View {
         /**
          * When we click the toggle all checkbox.
          */
-        this.componentChannels["add-todo-item"].on("toggle-all", toggle => {
-            for (let key in this.componentChannels) {
+        addTodoItemChannel.on("toggle-all", toggle => {
+            for (let key in this._componentChannels) {
                 if(/^todo-item/.test(key)) {
-                    this.componentChannels[key].trigger("toggle", toggle);
+                    this._componentChannels[key].trigger("toggle", toggle);
                 }
             }
         });
 
     }
 
-    /**
-     * Register the component.
-     *
-     * @param componentName {String} Name the component will be registered under.
-     * @param component {HTMLElement} The component you're registering.
-     * @param el {jQuery} Container/Element you're putting the component into.
-     * @param properties {Object} Properties you wish to apply to the component.
-     */
-    registerComponent (componentName, component, el, properties) {
-        let Component = App.Compontents;
-        let localCompName;
-
-        if(undefined !== this.components[componentName]) {
-
-            if(undefined === this._count[componentName]) {
-                this._count[componentName] = 0;
-            }
-            
-            localCompName = `${componentName}-${this._count[componentName]}`;
-            this._count[componentName]++;
-
-        } else {
-            localCompName = componentName;
-        }
-
-        const local = Component.register(componentName, component, properties, localCompName);
-        const componentObject = Component.getComponent(localCompName);
-
-        /** Store references to the component & radio channels **/
-        this.components[localCompName] = {
-            element: componentObject.component,
-            module: componentObject.componentModule
-        };
-
-        this.componentChannels[localCompName] = componentObject.radioChannel || {};
-        el.append(local);
-
-        return localCompName;
-    }
 }
 
 export default HomeView;

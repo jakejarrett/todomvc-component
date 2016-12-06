@@ -1,5 +1,5 @@
 import { Model } from "backbone";
-import { attributes } from "../../controllers/decorators";
+import { attributes } from "marionette-decorators";
 
 @attributes({
     defaults: {

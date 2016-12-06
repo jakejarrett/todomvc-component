@@ -1,5 +1,5 @@
 import App from "app/app";
-import { Component, on } from "marionette.component";
+import { Component, on } from "@jakejarrett/marionette-component";
 import Template from "./index.html";
 import * as Styles from "!css?modules!sass!./style.scss";
 

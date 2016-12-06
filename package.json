@@ -17,6 +17,7 @@
   "author": "Jake Jarrett <jakeryanjarrett@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@jakejarrett/marionette-component": "^0.2.6",
     "autoprefixer": "^6.4.0",
     "babel-core": "^6.0.0",
     "babel-loader": "^6.0.0",
@@ -50,6 +51,7 @@
     "jquery": "^2.1.4",
     "json-loader": "^0.5.4",
     "lodash": "^3.10.1",
+    "marionette-decorators": "^1.0.4",
     "marionette.component": "git+https://github.com/jakejarrett/Marionette.Component.git",
     "mz": "^2.4.0",
     "node-sass": "^3.8.0",

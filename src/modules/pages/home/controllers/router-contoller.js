@@ -1,4 +1,4 @@
-import Marionette, { Object } from "marionette";
+import { Object } from "marionette";
 import App from "app/app";
 
 class HomeRouterController extends Object {

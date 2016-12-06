@@ -1,5 +1,5 @@
 import Marionette from "marionette";
-import {attribute} from "./decorators";
+import { attribute } from "marionette-decorators";
 
 /**
  * Marionette Component controller.
@@ -73,6 +73,14 @@ class ComponentController extends Marionette.Object {
         };
 
         return elem;
+    }
+
+    reset () {
+        for (let key in this.__components) {
+            if(this.__components.hasOwnProperty(key)) {
+                delete this.__components[key];
+            }
+        }
     }
 
     /**
