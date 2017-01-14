@@ -178,6 +178,8 @@ class HomeView extends View {
         todoItemChannel.on("remove-item", value => {
             this.$el.find(`[data-id='${value}']`).remove();
 
+            localStorage.removeItem(value);
+
             footerChannel.trigger("update-state", {
                 count: this.$el.find("#todo-list").children().length,
                 hasItems: (this.$el.find("#todo-list").children().length !== 0)
