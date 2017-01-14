@@ -62,6 +62,7 @@ class HomeView extends View {
         this.setupComponents();
         this.setupComponentEventListeners();
         this.rendered = true;
+        this.hydrateFromLocalStorage();
     }
 
     /**
@@ -82,62 +83,9 @@ class HomeView extends View {
         const footerChannel = this.getComponent("todo-footer").radioChannel;
 
         /** We can listen to events emitted by the component. **/
+        /** We can listen to events emitted by the component. **/
         addTodoItemChannel.on("add-item", value => {
-            const todoItem = this.registerComponent(App.Compontents, "todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
-
-            addTodoItemChannel.trigger("update-state", {
-                hasItems: (this.$el.find("#todo-list").children().length !== 0)
-            });
-
-            let todoItemObj = this.getComponent(todoItem);
-            let todoItemChannel = todoItemObj.radioChannel;
-            todoItemChannel.trigger("dom-ready", todoItemObj.element);
-
-            /**
-             * When one of the todo items changes state, update other components.
-             */
-            todoItemChannel.on("stateChange", ({state, target}) => {
-                if(state) {
-                    this.todoCount--;
-                } else {
-                    this.todoCount++;
-                }
-
-                if(target !== undefined) {
-                    if(state) {
-                        that.selectedItems[target] = state;
-                    } else {
-                        delete that.selectedItems[target];
-                    }
-                }
-
-                footerChannel.trigger("update-state", {
-                    count: this.todoCount,
-                    hasItems: (this.$el.find("#todo-list").children().length !== 0)
-                });
-
-            });
-
-            todoItemChannel.on("remove-item", value => {
-                this.$el.find(`[data-id='${value}']`).remove();
-
-                footerChannel.trigger("update-state", {
-                    count: this.$el.find("#todo-list").children().length,
-                    hasItems: (this.$el.find("#todo-list").children().length !== 0)
-                });
-
-                this.todoCount = this.$el.find("#todo-list").children().length;
-
-                delete this._componentChannels[value];
-            });
-
-            this.todoCount++;
-
-            footerChannel.trigger("update-state", {
-                count: this.todoCount,
-                hasItems: (this.$el.find("#todo-list").children().length !== 0)
-            });
-
+            this.addTodoItem(value);
         });
 
         /**
@@ -184,6 +132,79 @@ class HomeView extends View {
             }
         });
 
+    }
+
+    addTodoItem (value) {
+        const that = this;
+        const addTodoItemChannel = this.getComponent("add-todo-item").radioChannel;
+        const footerChannel = this.getComponent("todo-footer").radioChannel;
+        const todoItem = this.registerComponent(App.Compontents, "todo-item", TodoItem, this.$el.find("#todo-list"), { value: value }, true);
+
+        localStorage.setItem(todoItem, value);
+
+        addTodoItemChannel.trigger("update-state", {
+            hasItems: (this.$el.find("#todo-list").children().length !== 0)
+        });
+
+        let todoItemObj = this.getComponent(todoItem);
+        let todoItemChannel = todoItemObj.radioChannel;
+        todoItemChannel.trigger("dom-ready", todoItemObj.element);
+
+        /**
+         * When one of the todo items changes state, update other components.
+         */
+        todoItemChannel.on("stateChange", ({state, target}) => {
+            if(state) {
+                this.todoCount--;
+            } else {
+                this.todoCount++;
+            }
+
+            if(target !== undefined) {
+                if(state) {
+                    that.selectedItems[target] = state;
+                } else {
+                    delete that.selectedItems[target];
+                }
+            }
+
+            footerChannel.trigger("update-state", {
+                count: this.todoCount,
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
+            });
+
+        });
+
+        todoItemChannel.on("remove-item", value => {
+            this.$el.find(`[data-id='${value}']`).remove();
+
+            footerChannel.trigger("update-state", {
+                count: this.$el.find("#todo-list").children().length,
+                hasItems: (this.$el.find("#todo-list").children().length !== 0)
+            });
+
+            this.todoCount = this.$el.find("#todo-list").children().length;
+
+            delete this._componentChannels[value];
+        });
+
+        this.todoCount++;
+
+        footerChannel.trigger("update-state", {
+            count: this.todoCount,
+            hasItems: (this.$el.find("#todo-list").children().length !== 0)
+        });
+    }
+
+    hydrateFromLocalStorage ()  {
+        const that = this;
+
+        for(let item in localStorage) {
+            if("" !== localStorage[item].trim()) {
+                that.addTodoItem(localStorage[item]);
+            }
+
+        }
     }
 
 }
